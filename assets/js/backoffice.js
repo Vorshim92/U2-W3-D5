@@ -1,6 +1,6 @@
 const formAddProduct = document.getElementById("form-Add");
 const deleteBtn = document.getElementById("deleteBtn");
-const resetBtn = document.getElementById("reset");
+const resetBtn = document.getElementById("resetBtn");
 const modDiv = document.getElementById("mod-Prod");
 const url = "https://striveschool-api.herokuapp.com/api/product/";
 async function postProduct(product) {
@@ -23,17 +23,21 @@ async function postProduct(product) {
 }
 
 async function handlePOST(e) {
-  const product = {
-    name: document.getElementById("name").value,
-    description: document.getElementById("description").value,
-    brand: document.getElementById("brand").value,
-    imageUrl: document.getElementById("urlImage").value,
-    price: document.getElementById("price").value,
-  };
-  try {
-    await postProduct(product);
-  } catch (error) {
-    console.error("Errore durante il recupero degli album:", error);
+  const userRequest = window.confirm("Sei sicuro di voler aggiungere l'oggetto?");
+  if (userRequest === true) {
+    const product = {
+      name: document.getElementById("name").value,
+      description: document.getElementById("description").value,
+      brand: document.getElementById("brand").value,
+      imageUrl: document.getElementById("urlImage").value,
+      price: document.getElementById("price").value,
+    };
+    try {
+      await postProduct(product);
+      window.location.href = `./index.html`;
+    } catch (error) {
+      console.error("Errore durante il recupero degli album:", error);
+    }
   }
 }
 
@@ -63,27 +67,31 @@ async function modFn(productID) {
   }
 }
 async function handlePUT(e) {
-  try {
-    const newProduct = {
-      name: document.getElementById("name").value,
-      description: document.getElementById("description").value,
-      brand: document.getElementById("brand").value,
-      imageUrl: document.getElementById("urlImage").value,
-      price: document.getElementById("price").value,
-    };
-    const response = await fetch(url + productID, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWUxYmRhMTRjNTllYzAwMTk5MGQ4NjkiLCJpYXQiOjE3MDkyOTI5NjEsImV4cCI6MTcxMDUwMjU2MX0.RXwa7LNnDwhKZ0kQOJLwKWECR2IfV5LEMVw-mIUg3AA`,
-      },
-      body: JSON.stringify(newProduct),
-    });
-    if (!response.ok) {
-      throw new Error("Errore nella richiesta API");
+  const userRequest = window.confirm("Sei sicuro di voler modificare l'oggetto?");
+  if (userRequest === true) {
+    try {
+      const newProduct = {
+        name: document.getElementById("name").value,
+        description: document.getElementById("description").value,
+        brand: document.getElementById("brand").value,
+        imageUrl: document.getElementById("urlImage").value,
+        price: document.getElementById("price").value,
+      };
+      const response = await fetch(url + productID, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWUxYmRhMTRjNTllYzAwMTk5MGQ4NjkiLCJpYXQiOjE3MDkyOTI5NjEsImV4cCI6MTcxMDUwMjU2MX0.RXwa7LNnDwhKZ0kQOJLwKWECR2IfV5LEMVw-mIUg3AA`,
+        },
+        body: JSON.stringify(newProduct),
+      });
+      if (!response.ok) {
+        throw new Error("Errore nella richiesta API");
+      }
+      window.location.href = `./index.html`;
+    } catch (error) {
+      console.error("Errore durante il recupero del prodotto:", error);
     }
-  } catch (error) {
-    console.error("Errore durante il recupero del prodotto:", error);
   }
 }
 
@@ -114,13 +122,11 @@ window.onload = () => {
     modFn(productID);
     formAddProduct.addEventListener("submit", (e) => {
       e.preventDefault();
-
       handlePUT(e);
     });
     deleteBtn.classList.remove("d-none");
     deleteBtn.addEventListener("click", (e) => {
       e.preventDefault();
-
       handleDELETE(e);
     });
   } else {
@@ -135,7 +141,6 @@ window.onload = () => {
     formAddProduct.addEventListener("submit", (e) => {
       e.preventDefault();
       handlePOST(e);
-      formAddProduct.reset();
     });
   }
 };
