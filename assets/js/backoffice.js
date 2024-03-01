@@ -1,8 +1,8 @@
 const formAddProduct = document.getElementById("form-Add");
 const deleteBtn = document.getElementById("deleteBtn");
+const resetBtn = document.getElementById("reset");
 const modDiv = document.getElementById("mod-Prod");
 const url = "https://striveschool-api.herokuapp.com/api/product/";
-
 async function postProduct(product) {
   try {
     const response = await fetch(url, {
@@ -23,7 +23,6 @@ async function postProduct(product) {
 }
 
 async function handlePOST(e) {
-  e.preventDefault();
   const product = {
     name: document.getElementById("name").value,
     description: document.getElementById("description").value,
@@ -64,7 +63,6 @@ async function modFn(productID) {
   }
 }
 async function handlePUT(e) {
-  e.preventDefault();
   try {
     const newProduct = {
       name: document.getElementById("name").value,
@@ -90,17 +88,24 @@ async function handlePUT(e) {
 }
 
 async function handleDELETE(e) {
-  const product = {
-    name: document.getElementById("name").value,
-    description: document.getElementById("description").value,
-    brand: document.getElementById("brand").value,
-    imageUrl: document.getElementById("urlImage").value,
-    price: document.getElementById("price").value,
-  };
-  try {
-    await postProduct(product);
-  } catch (error) {
-    console.error("Errore durante il recupero degli album:", error);
+  const userRequest = window.confirm("Cancellare l'oggetto?");
+  if (userRequest === true) {
+    try {
+      const response = await fetch(url + productID, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWUxYmRhMTRjNTllYzAwMTk5MGQ4NjkiLCJpYXQiOjE3MDkyOTI5NjEsImV4cCI6MTcxMDUwMjU2MX0.RXwa7LNnDwhKZ0kQOJLwKWECR2IfV5LEMVw-mIUg3AA`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Errore nella richiesta API");
+      }
+      window.location.href = `./backoffice.html`;
+    } catch (error) {
+      console.error("Errore durante il recupero del prodotto:", error);
+    }
   }
 }
 
@@ -108,16 +113,27 @@ window.onload = () => {
   if ((productID = new URLSearchParams(window.location.search).get("id"))) {
     modFn(productID);
     formAddProduct.addEventListener("submit", (e) => {
+      e.preventDefault();
+
       handlePUT(e);
-      formAddProduct.reset();
     });
     deleteBtn.classList.remove("d-none");
     deleteBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+
       handleDELETE(e);
-      formAddProduct.reset();
     });
   } else {
+    resetBtn.classList.remove("d-none");
+    resetBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const userRequest = window.confirm("Cancellare l'oggetto?");
+      if (userRequest === true) {
+        formAddProduct.reset();
+      }
+    });
     formAddProduct.addEventListener("submit", (e) => {
+      e.preventDefault();
       handlePOST(e);
       formAddProduct.reset();
     });

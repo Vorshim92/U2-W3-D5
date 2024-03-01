@@ -48,11 +48,31 @@ function createCard(product) {
   const deleteBtn = document.getElementById("deleteBtn");
   deleteBtn.addEventListener("click", (e) => {
     handleDELETE(e);
+    window.location.href = `./index.html`;
   });
   const modBtn = cardElement.querySelector("#mod");
   modBtn.addEventListener("click", function (e) {
     window.location.href = `./backoffice.html?id=${product._id}`;
   });
+}
+async function handleDELETE(e) {
+  const userRequest = window.confirm("Cancellare l'oggetto?");
+  if (userRequest === true) {
+    try {
+      const response = await fetch(url + productID, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWUxYmRhMTRjNTllYzAwMTk5MGQ4NjkiLCJpYXQiOjE3MDkyOTI5NjEsImV4cCI6MTcxMDUwMjU2MX0.RXwa7LNnDwhKZ0kQOJLwKWECR2IfV5LEMVw-mIUg3AA`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Errore nella richiesta API");
+      }
+    } catch (error) {
+      console.error("Errore durante il recupero del prodotto:", error);
+    }
+  }
 }
 
 window.onload = () => {
