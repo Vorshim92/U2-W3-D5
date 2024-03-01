@@ -1,10 +1,9 @@
-const form = document.getElementById("form");
+const formAddProduct = document.getElementById("form-Add");
+const deleteBtn = document.getElementById("deleteBtn");
+const modDiv = document.getElementById("mod-Prod");
 const url = "https://striveschool-api.herokuapp.com/api/product/";
 
 async function postProduct(product) {
-  console.log(product);
-  console.log(url);
-
   try {
     const response = await fetch(url, {
       method: "POST",
@@ -23,7 +22,7 @@ async function postProduct(product) {
   }
 }
 
-async function handleQuery(e) {
+async function handlePOST(e) {
   e.preventDefault();
   const product = {
     name: document.getElementById("name").value,
@@ -39,8 +38,88 @@ async function handleQuery(e) {
   }
 }
 
+async function modFn(productID) {
+  try {
+    const response = await fetch(url + productID, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWUxYmRhMTRjNTllYzAwMTk5MGQ4NjkiLCJpYXQiOjE3MDkyOTI5NjEsImV4cCI6MTcxMDUwMjU2MX0.RXwa7LNnDwhKZ0kQOJLwKWECR2IfV5LEMVw-mIUg3AA`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Errore nella richiesta API");
+    }
+    const product = await response.json();
+    document.querySelector("h1").innerText = "Modifica il prodotto";
+    document.getElementById("name").value = product.name;
+    document.getElementById("description").value = product.description;
+    document.getElementById("brand").value = product.brand;
+    document.getElementById("urlImage").value = product.imageUrl;
+    document.getElementById("price").value = product.price;
+    return product;
+  } catch (error) {
+    console.error("Errore durante il recupero dei libri:", error);
+  }
+}
+async function handlePUT(e) {
+  e.preventDefault();
+  try {
+    const newProduct = {
+      name: document.getElementById("name").value,
+      description: document.getElementById("description").value,
+      brand: document.getElementById("brand").value,
+      imageUrl: document.getElementById("urlImage").value,
+      price: document.getElementById("price").value,
+    };
+    const response = await fetch(url + productID, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWUxYmRhMTRjNTllYzAwMTk5MGQ4NjkiLCJpYXQiOjE3MDkyOTI5NjEsImV4cCI6MTcxMDUwMjU2MX0.RXwa7LNnDwhKZ0kQOJLwKWECR2IfV5LEMVw-mIUg3AA`,
+      },
+      body: JSON.stringify(newProduct),
+    });
+    if (!response.ok) {
+      throw new Error("Errore nella richiesta API");
+    }
+  } catch (error) {
+    console.error("Errore durante il recupero del prodotto:", error);
+  }
+}
+
+async function handleDELETE(e) {
+  const product = {
+    name: document.getElementById("name").value,
+    description: document.getElementById("description").value,
+    brand: document.getElementById("brand").value,
+    imageUrl: document.getElementById("urlImage").value,
+    price: document.getElementById("price").value,
+  };
+  try {
+    await postProduct(product);
+  } catch (error) {
+    console.error("Errore durante il recupero degli album:", error);
+  }
+}
+
 window.onload = () => {
-  form.addEventListener("submit", (e) => {
-    handleQuery(e);
-  });
+  if ((productID = new URLSearchParams(window.location.search).get("id"))) {
+    modFn(productID);
+    formAddProduct.addEventListener("submit", (e) => {
+      handlePUT(e);
+      formAddProduct.reset();
+    });
+    deleteBtn.classList.remove("d-none");
+    deleteBtn.addEventListener("click", (e) => {
+      handleDELETE(e);
+      formAddProduct.reset();
+    });
+  } else {
+    formAddProduct.addEventListener("submit", (e) => {
+      handlePOST(e);
+      formAddProduct.reset();
+    });
+  }
 };
